@@ -3,7 +3,7 @@
 A minimal Bash script designed for Linux servers to monitor system resources and send real-time alerts via Telegram.
 
 ## Features
-- **RAM Monitoring**: Alerts when free RAM drops below a configurable threshold.
+- **RAM Monitoring**: Alerts when RAM usage exceeds a configurable threshold.
 - **Disk Usage**: Monitors all mounted partitions and alerts if they exceed a specific percentage.
 - **Telegram Integration**: Uses Telegram Bot API for instant notifications.
 - **Decoupled Config**: Environment variables are managed in a separate file for security.
