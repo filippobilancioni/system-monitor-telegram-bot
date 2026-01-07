@@ -1,4 +1,4 @@
-# System Resource Monitor (Dockerized)
+# System Monitor Telegram Bot (Dockerized)
 
 A minimal Bash-based monitoring solution designed to run as a lightweight Docker container. It monitors host system resources (RAM and Disk) and sends instant alerts via Telegram.
 
