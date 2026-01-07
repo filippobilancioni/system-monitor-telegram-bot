@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  system-monitor:
+    build: 
+      context: .
+    container_name: system-telegram-monitor
+    volumes:
+      - /proc/meminfo:/proc/meminfo:ro       # To read Host RAM
+      - /proc/stat:/proc/stat:ro             # To read Host Disk
+      - /proc/uptime:/proc/uptime:ro
+      - /:/host_root:ro
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_CHAT_ID=${CHAT_ID}
+      - RAM_THRESHOLD=80   # Percentage of RAM usage
+      - DISK_THRESHOLD=85  # Percentage of disk usage
+      - SLEEP_INTERVAL=60  # Seconds - Run the script each minute
+    restart: always
