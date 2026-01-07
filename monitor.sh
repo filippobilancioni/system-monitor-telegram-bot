@@ -1,56 +1,56 @@
 #!/bin/bash
 
-# Load configuration variables from the .env file
-if [ -f config.env ]; then
-    # Export variables while ignoring comments and empty lines
-    export $(grep -v '^#' config.env | xargs)
-else
-    echo "Error: config.env file not found!"
+# RAM and disk monitoring script with Telegram notifications
+# Load configuration file
+
+CONFIG_FILE="config.env"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: $CONFIG_FILE not found!"
     exit 1
 fi
 
-HOSTNAME=$(hostname)
+source "$CONFIG_FILE"
 
-# Function to send messages via Telegram Bot API
-send_telegram() {
-    local message=$1
-    # Use curl to trigger the sendMessage endpoint
-    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
-         -d chat_id="$CHAT_ID" \
-         -d text="$message" > /dev/null
+# Function to send messages via Telegram
+send_telegram_message() {
+    local message="$1"
+    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d chat_id="${TELEGRAM_CHAT_ID}" \
+        -d text="$message" \
+        -d parse_mode="HTML" > /dev/null
 }
 
-echo "--- Starting System Check on $HOSTNAME ---"
-
-# 1. RAM MONITORING
-# Extract free memory percentage using 'free' and 'awk'
-FREE_RAM_PCT=$(free | grep Mem | awk '{print $4/$2 * 100.0}')
-# Truncate decimal part using Shell Parameter Expansion for integer comparison
-FREE_RAM_PCT=${FREE_RAM_PCT%.*}
-
-echo "Current Free RAM: $FREE_RAM_PCT%"
-
-if [ "$FREE_RAM_PCT" -lt "$RAM_THRESHOLD" ]; then
-    MSG="⚠️ RAM ALERT ($HOSTNAME): Only $FREE_RAM_PCT% of memory is free!"
-    echo "$MSG"
-    send_telegram "$MSG"
+# Check RAM usage
+ram_usage=$(free | grep Mem | awk '{print int($3/$2 * 100)}')
+if [ "$ram_usage" -gt "$RAM_THRESHOLD" ]; then
+    message="⚠️ <b>RAM Alert</b>%0A"
+    message+="Current usage: ${ram_usage}%%0A"
+    message+="Configured threshold: ${RAM_THRESHOLD}%"
+    send_telegram_message "$message"
+    echo "RAM alert sent: ${ram_usage}%"
 fi
 
-# 2. DISK USAGE MONITORING
-# Iterate through all mounted partitions starting with /dev/
-df -h | grep '^/dev/' | while read -r line; do
-    # Extract usage percentage (5th column) and remove the '%' symbol
-    USAGE=$(echo "$line" | awk '{print $5}' | sed 's/%//g')
-    # Extract partition name (1st column)
-    PARTITION=$(echo "$line" | awk '{print $1}')
+# Check disk usage
+df -h | grep -vE '^Filesystem|tmpfs|cdrom|loop' | awk '{print $5 " " $1 " " $6}' | while read output; do
+    usage=$(echo "$output" | awk '{print $1}' | sed 's/%//')
+    partition=$(echo "$output" | awk '{print $2}')
+    mount_point=$(echo "$output" | awk '{print $3}')
     
-    echo "Checking $PARTITION: $USAGE% used"
-
-    if [ "$USAGE" -gt "$DISK_THRESHOLD" ]; then
-        MSG="🚨 DISK ALERT ($HOSTNAME): Partition $PARTITION is $USAGE% full!"
-        echo "$MSG"
-        send_telegram "$MSG"
+    # Skip if usage is not a number - may cause problems in italian language version otherwise
+    if ! [[ "$usage" =~ ^[0-9]+$ ]]; then
+        continue
+    fi
+    
+    if [ "$usage" -gt "$DISK_THRESHOLD" ]; then
+        message="⚠️ <b>Disk Alert</b>%0A"
+        message+="Partition: ${partition}%0A"
+        message+="Mount point: ${mount_point}%0A"
+        message+="Current usage: ${usage}%%0A"
+        message+="Configured threshold: ${DISK_THRESHOLD}%"
+        send_telegram_message "$message"
+        echo "Disk alert sent for ${partition}: ${usage}%"
     fi
 done
 
-echo "--- Check Completed ---"
+echo "Check completed at $(date)"
