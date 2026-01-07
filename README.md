@@ -11,7 +11,7 @@ A minimal Bash script designed for Linux servers to monitor system resources and
 ## Prerequisites
 - A Linux environment (or Git Bash for testing).
 - `curl` installed (`sudo apt install curl` on Ubuntu/Debian).
-- A Telegram Bot (created via @BotFather).
+- A Telegram Bot (created via `@BotFather`).
 
 ## Setup
 1. Clone the repo: `git clone https://github.com/filippobilancioni/system-monitor-telegram-bot.git`
