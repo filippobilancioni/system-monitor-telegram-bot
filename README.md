@@ -28,7 +28,7 @@ A minimal Bash-based monitoring solution designed to run as a lightweight Docker
    environment:
    - RAM_THRESHOLD=75      # Alert if RAM &gt; 80%
    - DISK_THRESHOLD=80     # Alert if Disk &gt; 85%
-   - SLEEP_INTERVAL=60   # Check every hour (in seconds)
+   - SLEEP_INTERVAL=60     # Check every hour (in seconds)
    </pre>
 4. Run the Monitor:
    ```bash
