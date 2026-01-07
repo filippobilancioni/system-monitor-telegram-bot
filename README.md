@@ -14,7 +14,7 @@ A minimal Bash script designed for Linux servers to monitor system resources and
 - A Telegram Bot (created via @BotFather).
 
 ## Setup
-1. Clone the repo: `git clone https://github.com/your-user/system-monitor-telegram-bot.git`
+1. Clone the repo: `git clone https://github.com/filippobilancioni/system-monitor-telegram-bot.git`
 2. Create your config file: `cp config.env.example config.env`
 3. Edit `config.env` with your Bot Token and Chat ID.
 4. Give execution permissions: `chmod +x monitor.sh`
